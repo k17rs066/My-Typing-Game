@@ -9,11 +9,12 @@
         'set'
     ]
     let word =words[Math.floor(Math.random()*words.length)];
-    let loc=0;
-    let score=0;
-    let miss=0;
+    let loc
+    let score
+    let miss
     const timeLimit=3*1000; //JSは基本ミリ秒単位
     let startTime;
+    let isPlaying=false;
 
 
     const target=document.getElementById('target')
@@ -34,15 +35,53 @@
     function updateTimer(){
         const timeLeft=startTime+timeLimit - Date.now();
         timerLabel.textContent=(timeLeft/1000).toFixed(2);
+
+        const timeoutId=setTimeout(()=>{
+            updateTimer();
+        },10);
+
+        if(timeLeft<0){
+            isPlaying=false;
+            clearTimeout(timeoutId);
+            timerLabel.textContent='0.00';
+
+            setTimeout(()=>{
+                // alert('Game Over');
+                showResult();
+            },100)
+
+            target.textContent='click to replay'
+
+        }
     }
 
+
+    function showResult(){
+        const accuracy=score+miss===0 ? 0 : score/(score+miss)*100;
+        alert(`${score} letters, ${miss} missing, ${accuracy.toFixed(2)}% accuracy!`)
+    }
     window.addEventListener('click',()=>{
+        if(isPlaying===true){
+            return;
+        }
+        isPlaying=true;
+
+        loc =0;
+        score=0;
+        miss=0;
+        scoreLabel.textContent=score;
+        missLabel.textContent=miss;
+        word=words[Math.floor(Math.random()*words.length)];
+
         target.textContent=word;
         startTime = Date.now();
         updateTimer();
     });
 
     window.addEventListener('keydown',(e)=>{
+        if(isPlaying!==true){
+            return;
+        }
         console.log(e.key)
         if(e.key===word[loc]){
            // console.log('score');
